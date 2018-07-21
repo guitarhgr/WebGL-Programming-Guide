@@ -7,7 +7,7 @@ var VSHADER_SOURCE =
     '}\n';
 // 片元着色器
 var FSHADER_SOURCE =
-    'precision mediump float;\n' +
+    'precision mediump float;\n' + // 精度限定词：指定变量的范围(最大值和最小值)和范围
     'uniform vec4 u_FragColor;\n' +
     'void main() {\n' +
     '   gl_FragColor = u_FragColor;\n' +
