@@ -45,19 +45,24 @@ function main() {
     //      0.0,   0.0, 0.0, 1.0
     // ]
     // 这是按列主序的矩阵
-    var xformMatrix = new Float32Array([
-         cosB, sinB, 0.0, 0.0,
-        -sinB, cosB, 0.0, 0.0,
-          0.0,  0.0, 1.0, 0.0,
-          0.0,  0.0, 0.0, 1.0
-    ]);
-    // 将旋转矩阵传输给顶点着色器
+    /**自己创建矩阵*/
+    // var xformMatrix = new Float32Array([
+    //      cosB, sinB, 0.0, 0.0,
+    //     -sinB, cosB, 0.0, 0.0,
+    //       0.0,  0.0, 1.0, 0.0,
+    //       0.0,  0.0, 0.0, 1.0
+    // ]);
+    // // 将旋转矩阵传输给顶点着色器
     var u_xformMatrix = gl.getUniformLocation(gl.program, "u_xformMaxtrix");
     if(!u_xformMatrix) {
         console.log("Failed to get the storage location of u_xformMaxtrix");
         return;
     }
-    gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+    // gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+    /**使用这本书的大佬的矩阵库创建矩阵*/
+    var xformMatrix = new Matrix4(); // 为旋转矩阵创建Matrix4对象
+    xformMatrix.setRotate(ANGLE, 0, 0, 1); // 将xformMatrix设置为旋转矩阵
+    gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix.elements);
     // 设置<canvas>背景色
     gl.clearColor(0, 0, 0, 1);
     // 清除<canvas>
