@@ -100,7 +100,7 @@ Matrix4.prototype.concat = function (other) {
 Matrix4.prototype.multiply = Matrix4.prototype.concat;
 
 /**
- * Multiple the three-dimensional vector(乘以三维矢量)
+ * Multiple the three-dimensional vector(乘以三维向量)
  * @param pos The multiple vector(需要乘的矢量)
  * @return The result of mulitplicaiton(Float 32Array) 乘后的结果(32位的浮点类数组)
  */
@@ -113,4 +113,115 @@ Matrix4.prototype.multiplyVector3 = function (pos) {
     result[0] = p[0] * e[0] + p[1] * e[4] + p[2] * e[ 8] + e[12];
     result[1] = p[0] * e[1] + p[1] * e[5] + p[2] * e[ 9] + e[13];
     result[2] = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + e[14];
+
+    return v;
+};
+
+
+
+/**
+ * Multiply the fore-dimensional vector.(矩阵乘以四维向量)
+ * @param pos The multiple vector
+ * @return The result of multiplication(Float32Array)
+ */
+Matrix4.prototype.multiplyVector4 = function (pos) {
+    var e = this.elements;
+    var p = pos.elements;
+    var v = new Vector4();
+    var result = v.elements;
+
+    result[0] = p[0] * e[0] + p[1] * e[4] + p[2] * e[ 8] + p[3] * e[12];
+    result[1] = p[0] * e[1] + p[1] * e[5] + p[2] * e[ 9] + p[3] * e[13];
+    result[2] = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + p[3] * e[14];
+    result[3] = p[0] * e[3] + p[1] * e[7] + p[2] * e[11] + p[3] * e[15];
+
+    return v;
+};
+
+/**
+ * Transpose the Matrix.(转置矩阵)
+ * @returns {Matrix4}
+ */
+Matrix4.prototype.transpose = function () {
+    var e, t;
+
+    e = this.elements;
+
+    t = e[ 1]; e[ 1] = e[ 4]; e[ 4] = t;
+    t = e[ 2]; e[ 2] = e[ 8]; e[ 8] = t;
+    t = e[ 3]; e[ 3] = e[12]; e[12] = t;
+    t = e[ 6]; e[ 6] = e[ 9]; e[ 9] = t;
+    t = e[ 7]; e[ 7] = e[13]; e[13] = t;
+    t = e[11]; e[11] = e[14]; e[11] = t;
+
+    return this;
+};
+
+/**
+ * Calculate the inverse matrix of specified matrix, and set to this.(计算矩阵的逆矩阵，并设置到this)
+ * @param other The source matrix
+ * @returns {Matrix4} this
+ */
+Matrix4.prototype.setInverseOf = function (other) {
+    var i, s, d, inv, det;
+
+    s = other.elements;
+    d = this.elements;
+    inv = new Float32Array(16);
+
+    inv[0] =
+
+    return this;
+};
+
+
+
+/**
+ * Constructor of Vector3 三维向量构造器
+ * If opt_src is specified, new vector is initialized by opt_src
+ * @param opt_src source vector(option) 源向量
+ * @constructor
+ */
+var Vector3 = function (opt_src) {
+    var v = new Float32Array(3);
+    if (opt_src && typeof opt_src === 'object') {
+        v[0] = opt_src[0];
+        v[1] = opt_src[1];
+        v[2] = opt_src[2];
+    }
+    this.elements = v;
+};
+
+/**
+ * Normalize. 标准化
+ * @return this
+ */
+Vector3.prototype.normalize = function () {
+    var v = this.elements;
+    var c = v[0], d = v[1], e = v[2], g = Math.sqrt(c*c+d*d+e*e);
+    if (g) {
+        if (g == 1) {
+            return this;
+        }
+    } else {
+        v[0] = 0; v[1] = 0; v[2] = 0;
+        return this;
+    }
+    g = 1/g;
+    v[0] = c*g; v[1] = d*g; v[2] = e*g;
+    return this;
+};
+
+/**
+ * Constructor of Vector4 四维向量构造器
+ * If opt_src is specified, new vector is initialized by opt_src
+ * @param opt_src source vector(option)
+ * @constructor
+ */
+var Vector4 = function (opt_src) {
+    var v = new Float32Array(4);
+    if (opt_src && typeof opt_src === 'object') {
+        v[0] = opt_src[0]; v[1] = opt_src[1]; v[2] = opt_src[2]; v[3] = opt_src[3];
+    }
+    this.elements = v;
 }
