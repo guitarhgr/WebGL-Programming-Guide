@@ -102,7 +102,7 @@ Matrix4.prototype.multiply = Matrix4.prototype.concat;
 /**
  * Multiple the three-dimensional vector(乘以三维向量)
  * @param pos The multiple vector(需要乘的矢量)
- * @return The result of mulitplicaiton(Float 32Array) 乘后的结果(32位的浮点类数组)
+ * @returns {Vector3} The result of mulitplicaiton(Float 32Array) 乘后的结果(32位的浮点类数组)
  */
 Matrix4.prototype.multiplyVector3 = function (pos) {
     var e = this.elements;
@@ -122,7 +122,7 @@ Matrix4.prototype.multiplyVector3 = function (pos) {
 /**
  * Multiply the fore-dimensional vector.(矩阵乘以四维向量)
  * @param pos The multiple vector
- * @return The result of multiplication(Float32Array)
+ * @returns {Vector4} The result of multiplication(Float32Array)
  */
 Matrix4.prototype.multiplyVector4 = function (pos) {
     var e = this.elements;
@@ -584,6 +584,143 @@ Matrix4.prototype.setRotate = function (angle, x, y, z) {
 Matrix4.prototype.rotate = function (angle, x, y, z) {
     return this.concat(new Matrix4().setRotate(angle, x, y, z));
 };
+
+/**
+ * Set the viewing matrix
+ * @param eyeX The position of the eye point.
+ * @param eyeY
+ * @param eyeZ
+ * @param centerX The position of the reference point.
+ * @param centerY
+ * @param centerZ
+ * @param upX The direction of the up vector.
+ * @param upY
+ * @param upZ
+ * @returns {Matrix4|this}
+ */
+Matrix4.prototype.setLookAt = function (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+    var e, fx, fy, fz, rlf, sx, sy, sz, rls, ux, uy, uz;
+
+    fx = centerX - eyeX;
+    fy = centerY - eyeY;
+    fz = centerZ - eyeZ;
+
+    // Normalize f.
+    rlf = 1 / Math.sqrt(fx*fx + fy*fy + fz*fz);
+    fx *= rlf;
+    fy *= rlf;
+    fz *= rlf;
+
+    // Calculate cross product of f and up.
+    sx = fy * upZ - fz * upY;
+    sy = fz * upX - fx * upZ;
+    sz = fx * upY - fy * upX;
+
+    // Normalize x.
+    rls = 1 / Math.sqrt(sx*sx + sy*sy + sz*sz);
+    sx *= rls;
+    sy *= rls;
+    sz *= rls;
+
+    // Calculate cross product of s and f.
+    ux = sy * fz - sz * fy;
+    uy = sz * fx - sx * fz;
+    uz = sx * fy - sy * fx;
+
+    // Set to this
+    e = this.elements;
+    e[ 0] = sx;
+    e[ 1] = ux;
+    e[ 2] = -fx;
+    e[ 3] = 0;
+
+    e[ 4] = sy;
+    e[ 5] = uy;
+    e[ 6] = -fy;
+    e[ 7] = 0;
+
+    e[ 8] = sz;
+    e[ 9] = uz;
+    e[10] = -fz;
+    e[11] = 0;
+
+    e[12] = 0;
+    e[13] = 0;
+    e[14] = 0;
+    e[15] = 1;
+
+    return this.translate(-eyeX, -eyeY, -eyeZ);
+};
+
+/**
+ * Multiple the viewing matrix from the right
+ * @param eyeX The position of the eye point.
+ * @param eyeY
+ * @param eyeZ
+ * @param centerX The position of the reference point.
+ * @param centerY
+ * @param centerZ
+ * @param upX The direction of the up vector.
+ * @param upY
+ * @param upZ
+ * @returns {this}
+ */
+Matrix4.prototype.lookAt = function (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+    return this.concat(new Matrix4().setLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ));
+};
+
+/**
+ * Multiply the matrix for project vertex to plane
+ * @param plane The array[A, B, C, D] of the equation of plane "Ax + By + Cz + D = 0"
+ * @param light The array which stored coordinates of the light. if light[3]=0, treated as parallel light.
+ * @returns {this}
+ */
+Matrix4.prototype.dropShadow = function (plane, light) {
+    var mat = new Matrix4();
+    var e = mat.elements;
+
+    var dot = plane[0] * light[0] + plane[1] * light[1] + plane[2] * light[2] + plane[3] * light[3];
+
+    e[ 0] = dot - light[0] * plane[0];
+    e[ 1] =     - light[1] * plane[0];
+    e[ 2] =     - light[2] * plane[0];
+    e[ 3] =     - light[3] * plane[0];
+
+    e[ 4] =     - light[0] * plane[1];
+    e[ 5] = dot - light[1] * plane[1];
+    e[ 6] =     - light[2] * plane[1];
+    e[ 7] =     - light[3] * plane[1];
+
+    e[ 8] =     - light[0] * plane[2];
+    e[ 9] =     - light[1] * plane[2];
+    e[10] = dot - light[2] * plane[2];
+    e[11] =     - light[3] * plane[2];
+
+    e[12] =     - light[0] * plane[3];
+    e[13] =     - light[1] * plane[3];
+    e[14] =     - light[2] * plane[3];
+    e[15] = dot - light[3] * plane[3];
+
+    return this.concat(mat);
+};
+
+/**
+ * Multiple the matrix for project vertex to plane from the right.(Projected by parallel light)
+ * @param normX The normal vector of the plane.(Not necessary to be normalized.)
+ * @param normY
+ * @param normZ
+ * @param planeX The coordinate of arbitrary points on a plane.
+ * @param planeY
+ * @param planeZ
+ * @param lightX The vector of the direction of light.(Not necessary to be normalized.)
+ * @param lightY
+ * @param lightZ
+ * @returns {this}
+ */
+Matrix4.prototype.dropShadowDirectionally = function (normX, normY, normZ, planeX, planeY, planeZ, lightX, lightY, lightZ) {
+    var a = planeX * normX + planeY * normY + planeZ * normZ;
+    return this.dropShadow([normX, normY, normZ, -a], [lightX, lightY, lightZ, 0]);
+}
 
 /**
  * Constructor of Vector3 三维向量构造器
