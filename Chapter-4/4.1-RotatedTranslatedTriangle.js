@@ -36,8 +36,10 @@ function main() {
     // 计算模型矩阵
     var ANGLE = 60.0;
     var Tx = 0.5;
-    modelMatrix.setRotate(ANGLE, 0, 0, 1);
-    modelMatrix.translate(Tx, 0, 0);
+    // modelMatrix.setRotate(ANGLE, 0, 0, 1);
+    // modelMatrix.translate(Tx, 0, 0);
+    modelMatrix.setTranslate(Tx, 0, 0);
+    modelMatrix.rotate(ANGLE, 0, 0, 1);
     // 将模型矩阵传到顶点着色器上
     var u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
     if (!u_ModelMatrix) {
