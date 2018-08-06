@@ -521,7 +521,7 @@ Matrix4.prototype.setRotate = function (angle, x, y, z) {
         e[0] = c;   e[4] = 0;   e[ 8] = s;  e[12] = 0;
         e[1] = 0;   e[5] = 1;   e[ 9] = 0;  e[13] = 0;
         e[2] =-s;   e[6] = 0;   e[10] = c;  e[14] = 0;
-        e[3] = 0;   e[7] = 0;   e[11] = 0;  e[15] = 0;
+        e[3] = 0;   e[7] = 0;   e[11] = 0;  e[15] = 1;
     } else if (0 === x && 0 === y && 0 !== z) {
         // Rotation around Z axis
         if (z < 0) {
@@ -566,7 +566,7 @@ Matrix4.prototype.setRotate = function (angle, x, y, z) {
         e[12] = 0;
         e[13] = 0;
         e[14] = 0;
-        e[15] = 0;
+        e[15] = 1;
     }
 
     return this;
