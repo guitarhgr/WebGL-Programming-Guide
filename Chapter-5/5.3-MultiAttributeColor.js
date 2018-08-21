@@ -3,7 +3,7 @@ var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
     'attribute vec4 a_Color;\n' +
     'attribute float a_PointSize;\n' +
-    'varying vec4 v_Color;\n' +
+    'varying vec4 v_Color;\n' + // varying变量
     'void main() {\n' +
     '   gl_Position = a_Position;\n' +
     '   gl_PointSize = a_PointSize;\n' +
@@ -12,9 +12,9 @@ var VSHADER_SOURCE =
 // 片元着色器
 var FSHADER_SOURCE =
     'precision mediump float;\n' +
-    'varying vec4 v_Color;\n' +
+    'varying vec4 v_Color;\n' + // 将数据传给片元着色器
     'void main() {\n' +
-    '   gl_FragColor = v_Color;\n' +
+    '   gl_FragColor = v_Color;\n' + // 从顶点着色器接收数据
     '}\n';
 // 主程序
 function main() {
