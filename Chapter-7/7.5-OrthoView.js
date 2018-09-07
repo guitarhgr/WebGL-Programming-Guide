@@ -159,3 +159,25 @@ function drawView(gl, n, u_ProjMatrix, projMatrix, nfElement) {
     nfElement.innerHTML = `near: ${Math.round(g_near*100)/100}, far: ${Math.round(g_far*100)/100};`;
     gl.drawArrays(gl.TRIANGLES, 0, n);
 }
+
+/**划重点
+ * 1. 可视范围：既实际观察得到的区域边界。
+ * 2. 正射类型可视范围：
+ *      虽然可以将三维物体放在三维空间中的任何地方，但是只有当它在可视范围内时，WebGL才会绘制它。事实上，不绘制可视范围外的对象，
+ *      是基本的降低程序开销的手段。绘制可视范围外的对象没有意义，即使把它们绘制出来也不会在屏幕上显示。从某种程序上来说，这样做
+ *      也模拟了人类观察物体的方式。人类也只能看到眼前的东西，水平视角大约200度左右。总之WebGL只绘制可视范围内的三维对象。
+ * 3. 可视空间：包括水平视角，垂直视角和可视深度
+ * 4. 可视空间类型：
+ *      a.长方体可视空间，也称盒状空间，由正射投影(orthographic projection)产生。
+ *      b.四棱锥/金字塔可视空间，由透视投影(perspective projection)产生。
+ * 5. 盒状可视空间的工作原理：
+ *      可视空间由前后两个矩形表面确定，分别称近裁剪面(near clipping plane)和远裁剪面(far clipping plane)。
+ *      近裁剪面的四个顶点为：
+ *          (right, top, -near), (-left, top, -near), (-left, -bottom, -near), (right, -bottom, -near)
+ *      远裁剪面的四个顶点为：
+ *          (right, top, far), (-left, top, far), (-left, -bottom, far), (right, -bottom, far)
+ *      <canvas>上显示的就是可视空间中物体在近裁剪面上的投影。如果裁剪面的宽高比和<canvas>不一样，那么画面就会被按照<canvas>的
+ *      宽高比进行压缩，物体会被扭曲。近裁剪面与远裁剪面之间的盒形空间就是可视空间，只有在此空间内的物体会被显示出来。如果某个物
+ *      体一部分在可视空间内，一部分在其外，那就只显示空间内的部分。
+ *
+ * */
