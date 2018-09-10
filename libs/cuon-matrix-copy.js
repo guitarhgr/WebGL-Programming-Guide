@@ -392,7 +392,7 @@ Matrix4.prototype.setPerspective = function (fovy, aspect, near, far) {
     e[ 3] = 0;
 
     e[ 4] = 0;
-    e[ 5] = 0;
+    e[ 5] = ct;
     e[ 6] = 0;
     e[ 7] = 0;
 
