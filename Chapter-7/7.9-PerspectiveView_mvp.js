@@ -1,20 +1,20 @@
 // 顶点着色器
 var VSHADER_SOURCE =
-    `
+`
     attribute vec4 a_Position;
     attribute vec4 a_Color;
+    uniform mat4 u_ModelMatrix;
     uniform mat4 u_ViewMatrix;
     uniform mat4 u_ProjMatrix;
-    uniform mat4 u_ModelMatrix;
     varying vec4 v_Color;
     void main() {
-        gl_Position = u_ProjMatrix * u_ViewMatrix * a_Position;
+        gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
         v_Color = a_Color;
     }
 `;
 // 片元着色器
 var FSHADER_SOURCE =
-    `
+`
     #ifdef GL_ES
         precision mediump float;
     #endif
@@ -47,9 +47,9 @@ function main() {
     // 设置<canvas>的清除色
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     // 获取u_ViewMatrix和u_ProjMatrix的存储地址
-    var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix'),
-        u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix'),
-        u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix'),
+        u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix'),
+        u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
     if (!u_ProjMatrix || !u_ViewMatrix || !u_ModelMatrix) {
         console.log('Failed to get the storage location of u_ViewMatrix or u_ProjMatrix, u_ModelMatrix');
         return -1;
@@ -84,7 +84,7 @@ function main() {
 function initVertexBuffers(gl) {
     // 创建顶点数据的浮点类型数组
     var verticesColors = new Float32Array([
-         0.0,  1.0, -4.0,    0.4, 1.0, 0,4,
+         0.0,  1.0, -4.0,    0.4, 1.0, 0.4,
         -0.5, -1.0, -4.0,    0.4, 1.0, 0.4,
          0.5, -1.0, -4.0,    1.0, 0.4, 0.4,
 
@@ -96,7 +96,7 @@ function initVertexBuffers(gl) {
         -0.5, -1.0,  0.0,    0.4, 0.4, 1.0,
          0.5, -1.0,  0.0,    1.0, 0.4, 0.4
     ]);
-    var n = 18; // 顶点数量
+    var n = 9; // 顶点数量
     // 创建缓冲区
     var vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
