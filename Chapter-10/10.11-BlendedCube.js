@@ -44,9 +44,13 @@ function main() {
     }
     // 设置<canvas>清除色
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
     // 设置隐藏面消除(开启深度测试)
     gl.enable(gl.DEPTH_TEST);
+
+    // 开启混合功能
     gl.enable(gl.BLEND);
+    // 指定混合函数
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     // 获取u_MvpMatrix的存储地址
@@ -67,8 +71,18 @@ function main() {
     // 清除背景色和深度缓冲
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // 绘制图形
+    // 绘制所有不透明图形
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+
+    // 锁定用于进行隐藏面消除的深度缓冲区的写入操作，使之只读
+    gl.depthMask(false);
+
+    // 绘制透明物体
+    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+
+    //释放深度缓冲区，使之可读可写
+    gl.depthMask(true);
+
 }
 
 /**
