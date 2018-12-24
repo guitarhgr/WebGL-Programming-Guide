@@ -1,5 +1,5 @@
 // 顶点着色器
-var VSHADER_SOURCE =
+const VSHADER_SOURCE =
 `
     attribute vec4 a_Position; // 位置
     attribute vec4 a_Color; // 颜色
@@ -17,7 +17,7 @@ var VSHADER_SOURCE =
 `;
 
 // 片元着色器
-var FSHADER_SOURCE =
+const FSHADER_SOURCE =
 `
     #ifdef GL_ES
         precision mediump float;
@@ -82,14 +82,14 @@ function main() {
     // 当前角度
     let currentAngle = 0.0;
     // 设置循环绘制函数
-    var tick = function () {
+    const tick = function () {
         // 计算当前角度
         currentAngle = animate(currentAngle);
         // 绘制
         draw(gl, gl.program, currentAngle, viewProjMatrix, model);
         // 循环调用
         requestAnimationFrame(tick);
-    }
+    };
     // 开始绘制
     tick();
 }
@@ -102,7 +102,7 @@ function main() {
  */
 function initVertexBuffers(gl, program) {
     // 创建一个对象存储缓冲数据
-    var o = {};
+    const o = {};
     // 创建空的数据缓冲
     o.vertexBuffer = createEmptyArrayBuffer(gl, program.a_Position, 3, gl.FLOAT); // 位置
     o.normalBuffer = createEmptyArrayBuffer(gl, program.a_Normal, 3, gl.FLOAT); // 法向量
@@ -129,11 +129,11 @@ function initVertexBuffers(gl, program) {
  * @param {number} a_attribute 着色器变量存储地址
  * @param {number} num 数量
  * @param {number} type 渲染类型
- * @returns {WebGLBuffer}
+ * @returns {*}
  */
 function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     // 创建缓冲区对象
-    var buffer = gl.createBuffer();
+    const buffer = gl.createBuffer();
     // 判断缓冲区对象是否存在
     if (!buffer) {
         console.log('Failed to create the buffer object');
@@ -154,13 +154,13 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
  * @method readOBJFile 读取OBJ文件
  * @param {string} fileName 模型名称
  * @param {object} gl
- * @param {} model
+ * @param {object} model
  * @param scale
  * @param reverse
  */
 function readOBJFile(fileName, gl, model, scale, reverse) {
     // 创建XMLHttpRequest请求
-    var request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     // 加载完成时
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status !== 404) {
@@ -215,12 +215,12 @@ const g_normalMatrix = new Matrix4();
  * @param gl
  * @param program
  * @param angle
- * @param viewPorjMatrix
+ * @param viewProjMatrix
  * @param model
  */
-function draw(gl, program, angle, viewPorjMatrix, model) {
+function draw(gl, program, angle, viewProjMatrix, model) {
     // 判断g_objDoc不为空 && MTLComplete
-    if (g_objDoc != null && g_objDoc.isMTLComplete()) {
+    if (g_objDoc !== null && g_objDoc.isMTLComplete()) {
         // 设置读取完成
         g_drawingInfo = onReadComplete(gl, model, g_objDoc);
         g_objDoc = null;
@@ -242,7 +242,7 @@ function draw(gl, program, angle, viewPorjMatrix, model) {
     gl.uniformMatrix4fv(program.u_NormalMatrix, false, g_normalMatrix.elements);
 
     // 设置模型视图矩阵的视图矩阵
-    g_mvpMatrix.set(viewPorjMatrix);
+    g_mvpMatrix.set(viewProjMatrix);
     // 模型视图矩阵乘模型矩阵
     g_mvpMatrix.multiply(g_modelMatrix);
     // 将模型视图矩阵传递给着色器
@@ -272,6 +272,9 @@ function onReadComplete(gl, model, objDoc) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, model.colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.colors, gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawingInfo.indices, gl.STATIC_DRAW);
 
     return drawingInfo;
 }
@@ -335,10 +338,10 @@ class OBJDoc {
         let line;
         let sp = new StringParser();
 
-        while ((line = lines[index++]) != null) {
+        while ((line = lines[index++]) !== null) {
             sp.init(line);
             const command = sp.getWord();
-            if (command == null) continue;
+            if (command === null) continue;
 
             switch (command) {
                 case '#':
@@ -350,14 +353,14 @@ class OBJDoc {
                     const request = new XMLHttpRequest();
 
                     request.onreadystatechange = function () {
-                        if (request.readyState == 4) {
-                            if (request.status != 404) {
+                        if (request.readyState === 4) {
+                            if (request.status !== 404) {
                                 onReadMTLFile(request.responseText, mtl);
                             } else {
                                 mtl.complete = true;
                             }
                         }
-                    }
+                    };
 
                     request.open('GET', path, true);
                     request.send();
@@ -382,7 +385,6 @@ class OBJDoc {
                 case 'f':
                     const face = this.parseFace(sp, currentMaterialName, this.vertices, reverse);
                     currentObject.addFace(face);
-                    continue;
             }
         }
 
@@ -542,7 +544,7 @@ class OBJDoc {
      * @method isMTLComplete MTL读取完成
      */
     isMTLComplete () {
-        if (this.mtls.length == 0) return true;
+        if (this.mtls.length === 0) return true;
 
         for (let i = 0; i < this.mtls.length; i++) {
             if (!this.mtls[i].complete) return false;
@@ -558,7 +560,7 @@ class OBJDoc {
     findColor (name) {
         for (let i = 0; i < this.mtls.length; i++) {
             for (let j = 0; j < this.mtls[i].materials.length; j++) {
-                if (this.mtls[i].materials[j].name == name) {
+                if (this.mtls[i].materials[j].name === name) {
                     return (this.mtls[i].materials[j].color);
                 }
             }
@@ -643,7 +645,7 @@ function onReadMTLFile(fileString, mtl) {
     while ((line = lines[index++]) != null) {
         sp.init(line);
         const commond = sp.getWord();
-        if (commond == null) continue;
+        if (commond === null) continue;
 
         switch (commond) {
             case '#':
@@ -652,11 +654,10 @@ function onReadMTLFile(fileString, mtl) {
                 name = mtl.parseNewMTL(sp);
                 continue;
             case 'Kd':
-                if (name == '') continue;
+                if (name === '') continue;
                 const material = mtl.parseRGB(sp, name);
                 mtl.materials.push(material);
                 name = '';
-                continue;
         }
     }
     mtl.complete = true;
@@ -845,7 +846,7 @@ class StringParser {
         for (i = this.index, len  = this.str.length; i < len; i++) {
             const c = this.str.charAt(i);
             // 跳过 TAB, Space, '(', ')'
-            if (c == '\t' || c == ' ' || c == '(' || c == ')' || c == '"') {
+            if (c === '\t' || c === ' ' || c === '(' || c === ')' || c === '"') {
                 continue;
             }
             break;
